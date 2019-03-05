@@ -1,0 +1,9 @@
+{
+    "domains": [
+        "*.s.diol.jp",
+        "s.diol.jp"
+    ],
+    "is_production": true,
+    "bucket": "certs-bucket-skt-support",
+    "email": "skt-support@moe.dreamarts.co.jp"
+}

@@ -1,0 +1,33 @@
+--- main.py.org	2019-02-28 14:40:23.203323800 +0900
++++ main.py	2019-02-28 14:40:23.100775800 +0900
+@@ -33,21 +33,6 @@
+         },
+         'email': {
+             'type': 'string'
+-        },
+-        'slack': {
+-            'type': 'object',
+-            'required': [
+-                'webhook',
+-                'channel'
+-            ],
+-            'properties': {
+-                'webhook': {
+-                    'type': 'string'
+-                },
+-                'channel': {
+-                    'type': 'string'
+-                }
+-            }
+         }
+     }
+ }
+@@ -185,7 +170,7 @@
+         is_production = event.get('is_production')
+         bucket_name = event.get('bucket')
+         email = event.get('email')
+-        slack = event.get('slack')
++        # slack = event.get('slack')
+ 
+         if is_production:
+             stage = 'production'
