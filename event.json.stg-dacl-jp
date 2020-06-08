@@ -1,0 +1,9 @@
+{
+    "domains": [
+        "*.stg.dacl.jp",
+        "stg.dacl.jp"
+    ],
+    "is_production": true,
+    "bucket": "certs-bucket-stg-dacl-jp",
+    "email": "aws@idxdc.ne.jp"
+}
