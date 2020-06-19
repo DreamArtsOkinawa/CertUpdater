@@ -88,9 +88,10 @@ def provision_cert(domains, is_production, email):
     return load_cert(domains)
 
 
-def create_pfx_file(domain, pfx_password):
-    path = domain.replace('*.', '', 1)
-    path = '/tmp/config-dir/live/' + path
+def create_pfx_file(domains, pfx_password):
+    first_domain_name = domains[0].replace('*.', '', 1)
+
+    path = '/tmp/config-dir/live/' + first_domain_name
 
     command = "openssl pkcs12 -export -in %s -inkey %s -out %s -password pass:%s" \
               % (path + '/fullchain.pem', path + '/privkey.pem', path + '/azure.pfx', pfx_password)
@@ -98,11 +99,9 @@ def create_pfx_file(domain, pfx_password):
     return read_file_binary(path + '/azure.pfx')
 
 
-def upload_cert_to_s3(cert, bucket_name, is_production, pfx_password):
+def upload_cert_to_s3(cert, bucket_name, is_production, pfx_file):
     s3_urls = []
     for domain in cert['domains']:
-
-        pfx_file = create_pfx_file(domain, pfx_password)
 
         normalized_domain_name = domain.replace('*.', 'asterisk.', 1)
 
@@ -210,7 +209,9 @@ def handler(event, context):
 
         cert = provision_cert(domains, is_production, email)
 
-        s3_urls = upload_cert_to_s3(cert, bucket_name, is_production, pfx_password)
+        pfx_file = create_pfx_file(domains, pfx_password)
+
+        s3_urls = upload_cert_to_s3(cert, bucket_name, is_production, pfx_file)
 
         end_text = 'Finished uploading to S3:\n' + '\n'.join(s3_urls)
         send_logs(end_text, slack)
