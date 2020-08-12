@@ -1,0 +1,10 @@
+{
+    "domains": [
+        "*.dacl.jp",
+        "dacl.jp"
+    ],
+    "is_production": true,
+    "bucket": "certs-bucket-dacl",
+    "email": "sig@moe.dreamarts.co.jp",
+    "pfx_password": "dacl.jp"
+}
