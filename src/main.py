@@ -7,6 +7,7 @@ import urllib.request
 from botocore.exceptions import ClientError
 from acme import messages
 import jsonschema
+import subprocess
 
 schema = {
     'definitions': {},
@@ -33,6 +34,9 @@ schema = {
         },
         'email': {
             'type': 'string'
+        },
+        'pfx_password': {
+            'type': 'string'
         }
     }
 }
@@ -53,6 +57,11 @@ def load_cert(domains):
 
 def read_file(path):
     with open(path, 'r') as file:
+        return file.read()
+
+
+def read_file_binary(path):
+    with open(path, 'rb') as file:
         return file.read()
 
 
@@ -79,9 +88,21 @@ def provision_cert(domains, is_production, email):
     return load_cert(domains)
 
 
-def upload_cert_to_s3(cert, bucket_name, is_production):
+def create_pfx_file(domains, pfx_password):
+    first_domain_name = domains[0].replace('*.', '', 1)
+
+    path = '/tmp/config-dir/live/' + first_domain_name
+
+    command = "openssl pkcs12 -export -in %s -inkey %s -out %s -password pass:%s" \
+              % (path + '/fullchain.pem', path + '/privkey.pem', path + '/azure.pfx', pfx_password)
+    output = subprocess.check_output(command, shell=True)
+    return read_file_binary(path + '/azure.pfx')
+
+
+def upload_cert_to_s3(cert, bucket_name, is_production, pfx_file):
     s3_urls = []
     for domain in cert['domains']:
+
         normalized_domain_name = domain.replace('*.', 'asterisk.', 1)
 
         path = normalized_domain_name
@@ -103,6 +124,9 @@ def upload_cert_to_s3(cert, bucket_name, is_production):
 
         bucket.put_object(Key=path+'/fullchain.pem',
                           Body=cert['certificate_fullchain'])
+
+        bucket.put_object(Key=path+'/azure.pfx',
+                          Body=pfx_file)
 
         s3_urls.append('https://s3.console.aws.amazon.com/s3/buckets/' +
                        bucket_name + '/' + path + '/')
@@ -171,6 +195,7 @@ def handler(event, context):
         bucket_name = event.get('bucket')
         email = event.get('email')
         # slack = event.get('slack')
+        pfx_password = event.get('pfx_password')
 
         if is_production:
             stage = 'production'
@@ -184,7 +209,9 @@ def handler(event, context):
 
         cert = provision_cert(domains, is_production, email)
 
-        s3_urls = upload_cert_to_s3(cert, bucket_name, is_production)
+        pfx_file = create_pfx_file(domains, pfx_password)
+
+        s3_urls = upload_cert_to_s3(cert, bucket_name, is_production, pfx_file)
 
         end_text = 'Finished uploading to S3:\n' + '\n'.join(s3_urls)
         send_logs(end_text, slack)

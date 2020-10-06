@@ -1,9 +1,10 @@
 {
     "domains": [
-        "*.m.diol.jp",
-        "m.diol.jp"
+        "*.example.com",
+        "example.com"
     ],
     "is_production": true,
-    "bucket": "certs-bucket-skt-manage",
-    "email": "skt-manage@moe.dreamarts.co.jp"
+    "bucket": "certs-example-bucket",
+    "email": "cert@example.com",
+    "pfx_password": "xxxxxxxx"
 }

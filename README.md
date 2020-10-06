@@ -27,7 +27,8 @@
 ## Presentations (Japanese)
 
 - [Let's Encrypt 証明書の自動更新システムを作る](http://developer.hatenastaff.com/entry/2018/12/11/133000)
-
+- Let's Encryptの証明書ファイルからpfx形式ファイルを追加で作成する。
+- pfxファイルのパスワードはevent.json pfx_passowrd に設定する。
 ## Author
 
 [cohalz](https://github.com/cohalz)
